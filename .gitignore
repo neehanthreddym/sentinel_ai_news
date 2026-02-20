@@ -14,3 +14,39 @@ wheels/
 
 # Local Data
 data/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# IDE / Editor
+.idea/
+.vscode/settings.json
+.vscode/launch.json
+
+# Testing & Code Quality
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local development overrides
+.env.local
+.env.*.local
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# OS
+Thumbs.db

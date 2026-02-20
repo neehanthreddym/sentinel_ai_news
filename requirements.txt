@@ -2,3 +2,9 @@ ipykernel
 python-dotenv
 requests
 trafilatura
+SQLAlchemy
+alembic
+greenlet
+asyncpg
+pydantic
+httpx
