@@ -6,7 +6,7 @@ from dateutil import parser
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.api.schemas import RawArticleCreate
 from src.db.models import RawArticle
-from src.logger import get_logger
+from src.logger.custom_logger import get_logger
 
 # Set up a logger
 logger = get_logger(__name__)
