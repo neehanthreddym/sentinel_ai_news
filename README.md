@@ -1,6 +1,6 @@
 # Sentinel AI News
 
-Sentinel AI News is an automated, AI-driven news aggregation and synthesis platform. It relies on a multi-agent workflow to fetch raw articles, analyze their content, and generate professional, cohesive daily digests.
+Sentinel AI News is an automated, AI-driven news aggregation and synthesis platform. It relies on an Agentic Workflow (stateful LLM pipeline with an evaluator loop) to fetch raw articles, analyze their content, and generate professional, cohesive daily digests.
 
 ## 🚀 Progress & Features Built So Far
 
@@ -17,7 +17,7 @@ The foundational backend architecture has been established, focusing on robust d
 - **Multi-Agent LangGraph Workflow (`src/agents/`):**
   - **Researcher Agent:** Uses Groq to read raw articles, synthesize facts, and draft a Markdown digest (enforcing strict structured JSON output).
   - **Editor Agent:** Acts as a quality-control guardrail, reviewing the Researcher's draft for hallucinations, bias, and tone. If the draft fails, the Editor returns it to the Researcher with specific feedback for a rewrite.
-  - **State Graph:** The workflow cycles between Researcher and Editor until the draft is approved (or hits a max iteration limit).
+  - **Evaluator Loop:** The workflow cycles between Researcher and Editor until the draft is approved (or hits a max iteration limit).
   
   ![LangGraph Workflow diagram showing Researcher and Editor agents](assets/langgraph_workflow.png)
 

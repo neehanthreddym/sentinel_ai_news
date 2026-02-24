@@ -4,7 +4,7 @@
 <!-- This defines "Why" we are building this. -->
 **Problem**: In the age of information overload, professionals spend hours filtering through clickbait, duplicate stories, and low-quality sources to find relevant updates. Traditional aggregators (like Google News) group articles but lack depth, while simple LLM summaries often hallucinate or miss the "bigger picture" across multiple sources.
 
-**Solution**: "Sentinel" is an autonomous, multi-agent news intelligence system. Instead of just "aggregating" links, it acts as a Research Team: it ingests raw data at scale, uses an Agentic Workflow to fact-check and synthesize different sources into a unified narrative, and allows users to "interrogate" the news via a RAG interface.
+**Solution**: "Sentinel" is an autonomous, stateful LLM pipeline with an evaluator loop. Instead of just "aggregating" links, it acts as a Research Team: it ingests raw data at scale, uses an Agentic Workflow to fact-check and synthesize different sources into a unified narrative, and allows users to "interrogate" the news via a RAG interface.
 
 ## User Personas
 <!-- Who is this for? -->
@@ -19,10 +19,11 @@
 - **Deduplication**: Must identify that "SpaceX launches Starship" from CNN and "Starship flight successful" from BBC are the same event.
 - **Storage**: Store raw JSON for archival and cleaned chunks for RAG.
 
-**B. Multi-Agent Processor**
+**B. Agentic Workflow Processor**
 - **Researcher Agent**: Identifies key facts from raw articles and attaches `source_id` to every extracted claim.
 - **Citation Check**: Verifies that every `source_id` returned by the Researcher exists in the current article cluster. Invalid citations are rejected before synthesis.
 - **Editor Agent**: Reviews the synthesized summary for bias, clarity, and completeness.
+- **Evaluator Loop**: The workflow cycles between Researcher and Editor until the draft is approved or hits a maximum iteration limit.
 - **Publisher Agent**: Formats the final output into Markdown/JSON.
 
 **C. RAG & API**
@@ -40,6 +41,7 @@
     - Step 2 (Synthesize): Researcher Agent summarizes the cluster into one "Story," tagging every fact with its `source_id`.
     - Step 3 (Citation Check): Validates that each `source_id` maps to an article in the cluster. Rejects hallucinated citations.
     - Step 4 (Edit): Editor Agent reviews for bias, clarity, and missing sources.
+    - Step 5 (Evaluator Loop): Iterates between Researcher and Editor until the draft is finalized or the iteration limit is reached.
 5. **Storage**: Saves "Story" to PostgreSQL (metadata) and ChromaDB (vectors).
 6. **Consumption**: User hits FastAPI → retrieves Story feed OR Chatbot queries ChromaDB (with Semantic Cache in front).
 
