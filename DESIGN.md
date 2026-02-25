@@ -33,20 +33,39 @@
 - **Observability**: Every LLM token usage and cost must be tracked.
 
 ## System Architecture
-1. **Trigger**: Scheduled Cron Job (via GitHub Actions/Airflow).
-2. **Rate Limiter**: Token-bucket limiter with exponential backoff enforces crawl budget per run.
-3. **Ingest Service**: Python script hits NewsAPI → pushes raw JSON to intermediate storage.
-4. **Processor Service** (LangGraph):
-    - Step 1 (Cluster): Embed titles to find duplicates.
-    - Step 2 (Synthesize): Researcher Agent summarizes the cluster into one "Story," tagging every fact with its `source_id`.
-    - Step 3 (Citation Check): Validates that each `source_id` maps to an article in the cluster. Rejects hallucinated citations.
-    - Step 4 (Edit): Editor Agent reviews for bias, clarity, and missing sources.
-    - Step 5 (Evaluator Loop): Iterates between Researcher and Editor until the draft is finalized or the iteration limit is reached.
-5. **Storage**: Saves "Story" to PostgreSQL (metadata) and ChromaDB (vectors).
-6. **Consumption**: User hits FastAPI → retrieves Story feed OR Chatbot queries ChromaDB (with Semantic Cache in front).
+
+The system is organized into the following interconnected macro-components:
+
+1. **Trigger Layer**:
+    - **Scheduled Cron Job**: (via GitHub Actions/Airflow) running every 6 hours to initiate the ingestion process.
+
+2. **Ingest Service**:
+    - Checks a **Rate Limiter** for safe access to external APIs.
+    - Fetches headline data from **NewsAPI**.
+    - Uses a **Python Ingestion Script** to format data and store **Raw Articles** directly into the Database.
+
+3. **Processor Service (LangGraph)**:
+    - Queries **Unprocessed Articles** from PostgreSQL.
+    - **Step 1: Cluster**: Embed titles for duplicate detection and grouping.
+    - **Step 2: Synthesize**: Researcher Agent generates a draft Story along with `source_ids`.
+    - **Step 3: Citation Check**: Validates the extracted `source_ids` strictly against the article cluster.
+    - **Step 4: Edit**: Editor Agent reviews the draft for bias, clarity, and completeness.
+    - Stores the **Synthesized Story** and updates processing status in PostgreSQL, and creates **Story Vectors** in ChromaDB.
+
+4. **API Layer**:
+    - **REST API (FastAPI)**: Exposes a `/feed` endpoint that fetches "Stories JSON" representing the synthesized news from PostgreSQL.
+    - **RAG Chatbot**: Exposes a `/chat` endpoint. Uses a **Semantic Search** against ChromaDB (top-k chunks) and fetches Metadata from PostgreSQL.
+    - **Semantic Cache (Redis)**: Sits in front of the `/chat` endpoint. Returns cached AI responses or stores new responses on a cache miss.
+
+5. **Storage Layer**:
+    - **PostgreSQL**: Primary database for Raw Articles, Metadata, and Synthesized Stories.
+    - **ChromaDB**: Vector database holding Vector Embeddings for the RAG service.
+
+6. **Observability**:
+    - Dedicated component receiving traces from the Processor Service for monitoring **Tracing & Token Usage**.
 
 <!-- Visualizing the flow. -->
-<p align="center">
+<p align="center" style="background-color: #fafafa">
   <img src="assets/AINewsFeed_SystemArchitecture.png" width=750 />
 </p>
 
